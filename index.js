@@ -1,18 +1,12 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
-const uri = process.env.MONGODB_URI;
+const { client } = require("./db");
 const port = 3000;
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
 
-const aboutRoutes = require("./routes/about");
+const usersRoutes = require("./routes/users");
+
+app.use(express.json());
 
 app.get("/", (req, res) => {
   const uptime = process.uptime();
@@ -281,12 +275,14 @@ app.get("/", (req, res) => {
   `);
 });
 
-app.use("/about", aboutRoutes);
+app.use("/users", usersRoutes);
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    const database = client.db("anwesha");
+    const usersCollection = database.collection("users");
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(

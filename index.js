@@ -1,12 +1,35 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
+const cors = require("cors");
 const { client } = require("./db");
 const port = 3000;
 
 const usersRoutes = require("./routes/users");
+const postsRoutes = require("./routes/posts");
+const skillsRoutes = require("./routes/skills");
+const communityRoutes = require("./routes/community");
+const conversationRoutes = require("./routes/conversations");
+const applicationsRoutes = require("./routes/applications");
+const projectsRoutes = require("./routes/projects");
+const contractsRoutes = require("./routes/contracts");
+const hireRequestsRoutes = require("./routes/hireRequests");
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 app.get("/", (req, res) => {
   const uptime = process.uptime();
@@ -276,18 +299,27 @@ app.get("/", (req, res) => {
 });
 
 app.use("/users", usersRoutes);
+app.use("/posts", postsRoutes);
+app.use("/skills", skillsRoutes);
+app.use("/community", communityRoutes);
+app.use("/conversations", conversationRoutes);
+app.use("/applications", applicationsRoutes);
+app.use("/projects", projectsRoutes);
+app.use("/contracts", contractsRoutes);
+app.use("/hire-requests", hireRequestsRoutes);
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const database = client.db("anwesha");
-    const usersCollection = database.collection("users");
+    // const usersCollection = database.collection("users");
+    // const postsCollection = database.collection("posts");
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!",
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!",
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
